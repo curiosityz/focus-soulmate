@@ -46,6 +46,17 @@ class QueryInput(BaseModel):
 class TaskInput(BaseModel):
     task: str
 
+class ObjectiveInput(BaseModel):
+    title: str
+
+class Objective(BaseModel):
+    id: int
+    title: str
+    progress: int
+    time_spent: str
+
+objectives = []
+
 @app.post("/add_document")
 async def add_document(document: DocumentInput):
     doc = Document(content=document.text)
@@ -88,6 +99,30 @@ async def plan_task(task_input: TaskInput):
         return {"plan": results[0]}
     else:
         return {"message": "No plan generated"}
+
+@app.post("/add_objective")
+async def add_objective(objective: ObjectiveInput):
+    new_objective = Objective(
+        id=len(objectives) + 1,
+        title=objective.title,
+        progress=0,
+        time_spent="0 days"
+    )
+    objectives.append(new_objective)
+    return {"message": "Objective added successfully", "objective": new_objective}
+
+@app.get("/get_objectives")
+async def get_objectives():
+    return {"objectives": objectives}
+
+@app.put("/update_objective/{objective_id}")
+async def update_objective(objective_id: int, progress: int, time_spent: str):
+    for objective in objectives:
+        if objective.id == objective_id:
+            objective.progress = progress
+            objective.time_spent = time_spent
+            return {"message": "Objective updated successfully", "objective": objective}
+    raise HTTPException(status_code=404, detail="Objective not found")
 
 if __name__ == "__main__":
     import uvicorn
