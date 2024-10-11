@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,14 @@ const ProjectManagement = ({ onNavigate }) => {
   const [task, setTask] = useState('');
   const [objective, setObjective] = useState('');
   const queryClient = useQueryClient();
+
+  const { data: objectives, isLoading, error } = useQuery({
+    queryKey: ['objectives'],
+    queryFn: async () => {
+      const response = await axios.get('http://localhost:8000/get_objectives');
+      return response.data.objectives;
+    },
+  });
 
   const planTaskMutation = useMutation({
     mutationFn: async (task) => {
@@ -72,6 +80,26 @@ const ProjectManagement = ({ onNavigate }) => {
           <Button onClick={handleAddObjective}>Add Objective</Button>
         </CardContent>
       </Card>
+      {isLoading ? (
+        <div>Loading objectives...</div>
+      ) : error ? (
+        <div>Error fetching objectives: {error.message}</div>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Objectives</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {objectives.map((objective) => (
+              <div key={objective.id} className="mb-2">
+                <h3 className="font-semibold">{objective.title}</h3>
+                <p>Progress: {objective.progress}%</p>
+                <p>Time Spent: {objective.time_spent}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
       <Button onClick={() => onNavigate('dashboard')}>Back to Dashboard</Button>
     </div>
   );

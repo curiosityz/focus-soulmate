@@ -58,8 +58,8 @@ const DataPipeline = ({ onNavigate }) => {
             <CardTitle>Knowledge Base</CardTitle>
           </CardHeader>
           <CardContent>
-            {documents.map((doc) => (
-              <p key={doc.id}>{doc.content}</p>
+            {documents.map((doc, index) => (
+              <p key={index}>{doc.content}</p>
             ))}
           </CardContent>
         </Card>
