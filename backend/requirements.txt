@@ -3,3 +3,4 @@ uvicorn==0.22.0
 haystack-ai==2.0.0a2
 sentence-transformers==2.2.2
 farm-haystack==1.20.1
+python-dotenv==1.0.0

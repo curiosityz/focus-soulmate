@@ -5,6 +5,10 @@ from haystack import Pipeline
 from haystack.document_stores import InMemoryDocumentStore
 from haystack.nodes import PreProcessor, BM25Retriever, FARMReader, PromptNode, AnswerParser
 from haystack.schema import Document
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
 
 app = FastAPI()
 
@@ -24,7 +28,7 @@ preprocessor = PreProcessor(
 
 retriever = BM25Retriever(document_store=document_store)
 reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=False)
-prompt_node = PromptNode("gpt-3.5-turbo", api_key="your-openai-api-key")
+prompt_node = PromptNode("gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
 answer_parser = AnswerParser()
 
 # Initialize pipelines
