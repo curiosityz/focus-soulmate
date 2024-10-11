@@ -4,8 +4,9 @@ import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
 
-const ProjectManagement = ({ onNavigate }) => {
+const ProjectManagement = ({ onError }) => {
   const [task, setTask] = useState('');
   const [objective, setObjective] = useState('');
   const queryClient = useQueryClient();
@@ -16,6 +17,7 @@ const ProjectManagement = ({ onNavigate }) => {
       const response = await axios.get('http://localhost:8000/get_objectives');
       return response.data.objectives;
     },
+    onError,
   });
 
   const planTaskMutation = useMutation({
@@ -23,6 +25,13 @@ const ProjectManagement = ({ onNavigate }) => {
       const response = await axios.post('http://localhost:8000/plan_task', { task });
       return response.data;
     },
+    onSuccess: (data) => {
+      toast({
+        title: "Task Planned",
+        description: data.plan,
+      });
+    },
+    onError,
   });
 
   const addObjectiveMutation = useMutation({
@@ -32,7 +41,12 @@ const ProjectManagement = ({ onNavigate }) => {
     onSuccess: () => {
       queryClient.invalidateQueries('objectives');
       setObjective('');
+      toast({
+        title: "Success",
+        description: "Objective added successfully",
+      });
     },
+    onError,
   });
 
   const handlePlanTask = () => {
@@ -44,8 +58,8 @@ const ProjectManagement = ({ onNavigate }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Project Management</h2>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800">Project Management</h2>
       <Card>
         <CardHeader>
           <CardTitle>Plan Task</CardTitle>
@@ -55,15 +69,9 @@ const ProjectManagement = ({ onNavigate }) => {
             value={task}
             onChange={(e) => setTask(e.target.value)}
             placeholder="Enter a task to plan"
-            className="mb-2"
+            className="mb-4"
           />
           <Button onClick={handlePlanTask}>Plan Task</Button>
-          {planTaskMutation.data && (
-            <div className="mt-2">
-              <h3 className="font-semibold">Task Plan:</h3>
-              <p>{planTaskMutation.data.plan}</p>
-            </div>
-          )}
         </CardContent>
       </Card>
       <Card>
@@ -75,32 +83,33 @@ const ProjectManagement = ({ onNavigate }) => {
             value={objective}
             onChange={(e) => setObjective(e.target.value)}
             placeholder="Enter a new objective"
-            className="mb-2"
+            className="mb-4"
           />
           <Button onClick={handleAddObjective}>Add Objective</Button>
         </CardContent>
       </Card>
-      {isLoading ? (
-        <div>Loading objectives...</div>
-      ) : error ? (
-        <div>Error fetching objectives: {error.message}</div>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Objectives</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {objectives.map((objective) => (
-              <div key={objective.id} className="mb-2">
-                <h3 className="font-semibold">{objective.title}</h3>
-                <p>Progress: {objective.progress}%</p>
-                <p>Time Spent: {objective.time_spent}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-      <Button onClick={() => onNavigate('dashboard')}>Back to Dashboard</Button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Objectives</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div>Loading objectives...</div>
+          ) : error ? (
+            <div className="text-red-500">Error fetching objectives: {error.message}</div>
+          ) : (
+            <ul className="space-y-4">
+              {objectives.map((objective) => (
+                <li key={objective.id} className="border-b pb-2">
+                  <h3 className="font-semibold text-lg">{objective.title}</h3>
+                  <p className="text-sm text-gray-600">Progress: {objective.progress}%</p>
+                  <p className="text-sm text-gray-600">Time Spent: {objective.time_spent}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

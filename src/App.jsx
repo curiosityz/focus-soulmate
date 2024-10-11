@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import Dashboard from './components/Dashboard';
 import DataPipeline from './components/DataPipeline';
 import ProjectManagement from './components/ProjectManagement';
+import { Button } from "@/components/ui/button";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,11 +41,37 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-4">ProjectMind</h1>
-        {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onError={handleError} />}
-        {currentView === 'dataPipeline' && <DataPipeline onNavigate={handleNavigate} onError={handleError} />}
-        {currentView === 'projectManagement' && <ProjectManagement onNavigate={handleNavigate} onError={handleError} />}
+      <div className="min-h-screen bg-gray-100">
+        <nav className="bg-white shadow-md">
+          <div className="container mx-auto px-6 py-3">
+            <h1 className="text-3xl font-bold text-gray-800">ProjectMind</h1>
+            <div className="mt-4 flex space-x-4">
+              <Button
+                variant={currentView === 'dashboard' ? 'default' : 'outline'}
+                onClick={() => handleNavigate('dashboard')}
+              >
+                Dashboard
+              </Button>
+              <Button
+                variant={currentView === 'dataPipeline' ? 'default' : 'outline'}
+                onClick={() => handleNavigate('dataPipeline')}
+              >
+                Data Pipeline
+              </Button>
+              <Button
+                variant={currentView === 'projectManagement' ? 'default' : 'outline'}
+                onClick={() => handleNavigate('projectManagement')}
+              >
+                Project Management
+              </Button>
+            </div>
+          </div>
+        </nav>
+        <main className="container mx-auto p-6">
+          {currentView === 'dashboard' && <Dashboard onError={handleError} />}
+          {currentView === 'dataPipeline' && <DataPipeline onError={handleError} />}
+          {currentView === 'projectManagement' && <ProjectManagement onError={handleError} />}
+        </main>
       </div>
       <Toaster />
     </QueryClientProvider>
