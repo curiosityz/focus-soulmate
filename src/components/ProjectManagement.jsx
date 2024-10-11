@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useMutation } from "@tanstack/react-query";
-import axios from 'axios';
 
 const ProjectManagement = ({ onNavigate }) => {
   const [task, setTask] = useState('');
+  const [objective, setObjective] = useState('');
+  const queryClient = useQueryClient();
 
   const planTaskMutation = useMutation({
     mutationFn: async (task) => {
@@ -15,8 +17,22 @@ const ProjectManagement = ({ onNavigate }) => {
     },
   });
 
+  const addObjectiveMutation = useMutation({
+    mutationFn: async (title) => {
+      await axios.post('http://localhost:8000/add_objective', { title });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries('objectives');
+      setObjective('');
+    },
+  });
+
   const handlePlanTask = () => {
     planTaskMutation.mutate(task);
+  };
+
+  const handleAddObjective = () => {
+    addObjectiveMutation.mutate(objective);
   };
 
   return (
@@ -40,6 +56,20 @@ const ProjectManagement = ({ onNavigate }) => {
               <p>{planTaskMutation.data.plan}</p>
             </div>
           )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Add Objective</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            value={objective}
+            onChange={(e) => setObjective(e.target.value)}
+            placeholder="Enter a new objective"
+            className="mb-2"
+          />
+          <Button onClick={handleAddObjective}>Add Objective</Button>
         </CardContent>
       </Card>
       <Button onClick={() => onNavigate('dashboard')}>Back to Dashboard</Button>
