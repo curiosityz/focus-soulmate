@@ -1,4 +1,4 @@
 fastapi==0.95.1
 uvicorn==0.22.0
-farm-haystack==1.20.1
+farm-haystack==1.21.2
 python-dotenv==1.0.0
