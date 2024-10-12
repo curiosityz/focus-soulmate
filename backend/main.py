@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-from haystack import Pipeline
+from haystack.pipelines import Pipeline
 from haystack.document_stores import InMemoryDocumentStore
 from haystack.nodes import PreProcessor, BM25Retriever, FARMReader, PromptNode, AnswerParser
 from haystack.schema import Document
