@@ -29,6 +29,7 @@ preprocessor = PreProcessor(
 retriever = BM25Retriever(document_store=document_store)
 reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=False)
 prompt_node = PromptNode("gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
+google_gemini_prompt_node = PromptNode("google-gemini", api_key=os.getenv("GOOGLE_GEMINI_API_KEY"))
 answer_parser = AnswerParser()
 
 # Initialize pipelines
@@ -39,7 +40,8 @@ query_pipeline.add_node(component=reader, name="Reader", inputs=["Retriever"])
 synthesis_pipeline = Pipeline()
 synthesis_pipeline.add_node(component=retriever, name="Retriever", inputs=["Query"])
 synthesis_pipeline.add_node(component=prompt_node, name="PromptNode", inputs=["Retriever"])
-synthesis_pipeline.add_node(component=answer_parser, name="AnswerParser", inputs=["PromptNode"])
+synthesis_pipeline.add_node(component=google_gemini_prompt_node, name="GoogleGeminiPromptNode", inputs=["PromptNode"])
+synthesis_pipeline.add_node(component=answer_parser, name="AnswerParser", inputs=["GoogleGeminiPromptNode"])
 
 class DocumentInput(BaseModel):
     text: str
@@ -127,6 +129,31 @@ async def update_objective(objective_id: int, progress: int, time_spent: str):
             objective.time_spent = time_spent
             return {"message": "Objective updated successfully", "objective": objective}
     raise HTTPException(status_code=404, detail="Objective not found")
+
+@app.post("/update_context")
+async def update_context(document: DocumentInput):
+    doc = Document(content=document.text)
+    preprocessed_docs = preprocessor.process([doc])
+    document_store.write_documents(preprocessed_docs)
+    return {"message": "Context updated successfully"}
+
+@app.get("/get_summary")
+async def get_summary():
+    prompt = "Provide a summary of what was accomplished yesterday, what is planned for today, and the upcoming week."
+    results = prompt_node.run(prompt)
+    if results:
+        return {"summary": results[0]}
+    else:
+        return {"message": "No summary generated"}
+
+@app.get("/get_roadmap")
+async def get_roadmap():
+    prompt = "Provide a roadmap for the next week, month, and 6 months."
+    results = prompt_node.run(prompt)
+    if results:
+        return {"roadmap": results[0]}
+    else:
+        return {"message": "No roadmap generated"}
 
 if __name__ == "__main__":
     import uvicorn

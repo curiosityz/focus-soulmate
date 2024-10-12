@@ -5,6 +5,8 @@ import { useToast } from "@/components/ui/use-toast";
 import Dashboard from './components/Dashboard';
 import DataPipeline from './components/DataPipeline';
 import ProjectManagement from './components/ProjectManagement';
+import Summary from './components/Summary';
+import Roadmap from './components/Roadmap';
 import { Button } from "@/components/ui/button";
 
 const queryClient = new QueryClient({
@@ -64,6 +66,18 @@ const App = () => {
               >
                 Project Management
               </Button>
+              <Button
+                variant={currentView === 'summary' ? 'default' : 'outline'}
+                onClick={() => handleNavigate('summary')}
+              >
+                Daily Summary
+              </Button>
+              <Button
+                variant={currentView === 'roadmap' ? 'default' : 'outline'}
+                onClick={() => handleNavigate('roadmap')}
+              >
+                Roadmap
+              </Button>
             </div>
           </div>
         </nav>
@@ -71,6 +85,8 @@ const App = () => {
           {currentView === 'dashboard' && <Dashboard onError={handleError} />}
           {currentView === 'dataPipeline' && <DataPipeline onError={handleError} />}
           {currentView === 'projectManagement' && <ProjectManagement onError={handleError} />}
+          {currentView === 'summary' && <Summary onError={handleError} />}
+          {currentView === 'roadmap' && <Roadmap onError={handleError} />}
         </main>
       </div>
       <Toaster />

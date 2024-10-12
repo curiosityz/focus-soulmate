@@ -9,15 +9,37 @@ const fetchObjectives = async () => {
   return response.data.objectives;
 };
 
+const fetchSummary = async () => {
+  const response = await axios.get('http://localhost:8000/get_summary');
+  return response.data.summary;
+};
+
+const fetchRoadmap = async () => {
+  const response = await axios.get('http://localhost:8000/get_roadmap');
+  return response.data.roadmap;
+};
+
 const Dashboard = ({ onError }) => {
-  const { data: objectives, isLoading, error } = useQuery({
+  const { data: objectives, isLoading: isLoadingObjectives, error: objectivesError } = useQuery({
     queryKey: ['objectives'],
     queryFn: fetchObjectives,
     onError,
   });
 
-  if (isLoading) return <div className="text-center">Loading objectives...</div>;
-  if (error) return <div className="text-center text-red-500">Error fetching objectives: {error.message}</div>;
+  const { data: summary, isLoading: isLoadingSummary, error: summaryError } = useQuery({
+    queryKey: ['summary'],
+    queryFn: fetchSummary,
+    onError,
+  });
+
+  const { data: roadmap, isLoading: isLoadingRoadmap, error: roadmapError } = useQuery({
+    queryKey: ['roadmap'],
+    queryFn: fetchRoadmap,
+    onError,
+  });
+
+  if (isLoadingObjectives || isLoadingSummary || isLoadingRoadmap) return <div className="text-center">Loading...</div>;
+  if (objectivesError || summaryError || roadmapError) return <div className="text-center text-red-500">Error fetching data: {objectivesError?.message || summaryError?.message || roadmapError?.message}</div>;
 
   return (
     <div className="space-y-6">
@@ -35,6 +57,22 @@ const Dashboard = ({ onError }) => {
             </CardContent>
           </Card>
         ))}
+      </div>
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold text-gray-800">Daily Summary</h3>
+        <Card className="mt-4">
+          <CardContent>
+            <p className="text-gray-700">{summary}</p>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold text-gray-800">Roadmap</h3>
+        <Card className="mt-4">
+          <CardContent>
+            <p className="text-gray-700">{roadmap}</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
